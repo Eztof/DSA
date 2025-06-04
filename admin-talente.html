@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Talente verwalten</title>
+</head>
+<body>
+  <h1>Talente</h1>
+
+  <h2>Neues Talent hinzufügen</h2>
+  <input id="name" placeholder="Name"><br>
+  <select id="gruppe">
+    <option>Kampftalente</option>
+    <option>Körperliche Talente</option>
+    <option>Gesellschaftliche Talente</option>
+    <option>Natur-Talente</option>
+    <option>Wissenstalente</option>
+    <option>Sprachen/Schriften</option>
+    <option>Handwerkstalente</option>
+  </select><br>
+  <input id="eigenschaft1" placeholder="Eigenschaft 1 (z. B. MU)">
+  <input id="eigenschaft2" placeholder="Eigenschaft 2 (z. B. GE)">
+  <input id="eigenschaft3" placeholder="Eigenschaft 3 (z. B. KK)"><br>
+  <select id="typ">
+    <option>Basis</option>
+    <option>Spezial</option>
+  </select><br>
+  <textarea id="voraussetzungen" placeholder="Voraussetzungen (Komma-getrennt)"></textarea><br>
+  <input id="ebe" type="number" placeholder="eBE-Wert"><br>
+  <textarea id="ersatzweise" placeholder="Ersatzweise Talente mit Erschwernis (z. B. Reiten (-2), Klettern (-4))"></textarea><br>
+  <button onclick="hinzufuegen()">Hinzufügen</button>
+
+  <h2>Vorhandene Talente</h2>
+  <div id="liste"></div>
+
+  <a href="admin.html">Zurück zum Adminbereich</a>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+      getFirestore, collection, getDocs, setDoc, deleteDoc, doc
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBHIftX5AvSJaPAiUIek0TBVjEtxwZo7Ow",
+      authDomain: "dsapp-6722f.firebaseapp.com",
+      projectId: "dsapp-6722f",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const talenteRef = collection(db, "talente");
+
+    async function ladeTalente() {
+      const container = document.getElementById("liste");
+      container.innerHTML = "";
+
+      const snapshot = await getDocs(talenteRef);
+      snapshot.forEach((eintrag) => {
+        const data = eintrag.data();
+        const id = eintrag.id;
+        const div = document.createElement("div");
+        div.innerHTML = `<strong>${data.name}</strong> (${data.gruppe}) – Typ: ${data.typ}<br>
+          Eigenschaften: ${data.eigenschaft1}, ${data.eigenschaft2}, ${data.eigenschaft3}<br>
+          eBE: ${data.ebe} <br>
+          Voraussetzungen: ${data.voraussetzungen?.join(", ") || "Keine"}<br>
+          Ersatzweise: ${data.ersatzweise?.join(", ") || "Keine"}<br>
+          <button onclick="loescheTalent('${id}')">Löschen</button><br><br>`;
+        container.appendChild(div);
+      });
+    }
+
+    window.hinzufuegen = async function () {
+      const name = document.getElementById("name").value.trim();
+      const gruppe = document.getElementById("gruppe").value;
+      const eigenschaft1 = document.getElementById("eigenschaft1").value.trim();
+      const eigenschaft2 = document.getElementById("eigenschaft2").value.trim();
+      const eigenschaft3 = document.getElementById("eigenschaft3").value.trim();
+      const typ = document.getElementById("typ").value;
+      const voraussetzungen = document.getElementById("voraussetzungen").value.split(",").map(s => s.trim()).filter(s => s);
+      const ebe = parseInt(document.getElementById("ebe").value);
+      const ersatzweise = document.getElementById("ersatzweise").value.split(",").map(s => s.trim()).filter(s => s);
+
+      if (!name || !eigenschaft1 || !eigenschaft2 || !eigenschaft3 || isNaN(ebe)) {
+        alert("Bitte alle Pflichtfelder ausfüllen.");
+        return;
+      }
+
+      const id = name.toLowerCase().replace(/\s+/g, "-");
+      await setDoc(doc(db, "talente", id), {
+        name, gruppe, eigenschaft1, eigenschaft2, eigenschaft3,
+        typ, voraussetzungen, ebe, ersatzweise
+      });
+
+      document.querySelectorAll("input, textarea").forEach(el => el.value = "");
+      ladeTalente();
+    };
+
+    window.loescheTalent = async function (id) {
+      if (confirm(`Talent "${id}" wirklich löschen?`)) {
+        await deleteDoc(doc(db, "talente", id));
+        ladeTalente();
+      }
+    };
+
+    ladeTalente();
+  </script>
+</body>
+</html>
