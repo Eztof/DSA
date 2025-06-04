@@ -9,6 +9,7 @@
 
   <h2>Neues Talent hinzufügen</h2>
   <input id="name" placeholder="Name"><br>
+
   <select id="gruppe">
     <option>Kampftalente</option>
     <option>Körperliche Talente</option>
@@ -43,6 +44,19 @@
     <option>BE–4</option>
     <option>BE–5</option>
     <option>x2</option>
+  </select><br>
+
+  <label>Steigern:</label>
+  <select id="steigern">
+    <option>A*</option>
+    <option>A</option>
+    <option>B</option>
+    <option>C</option>
+    <option>D</option>
+    <option>E</option>
+    <option>F</option>
+    <option>G</option>
+    <option>H</option>
   </select><br>
 
   <textarea id="ersatzweise" placeholder="Ersatzweise Talente mit Erschwernis (Komma-getrennt)"></textarea><br>
@@ -103,7 +117,7 @@
         const div = document.createElement("div");
         div.innerHTML = `<strong>${data.name}</strong> (${data.gruppe}) – Typ: ${data.typ}<br>
           Eigenschaften: ${data.eigenschaft1}, ${data.eigenschaft2}, ${data.eigenschaft3}<br>
-          eBE: ${data.ebe} <br>
+          eBE: ${data.ebe}, Steigern: ${data.steigern} <br>
           Voraussetzungen: ${data.voraussetzungen?.join(", ") || "Keine"}<br>
           Ersatzweise: ${data.ersatzweise?.join(", ") || "Keine"}<br>
           <button onclick="loescheTalent('${id}')">Löschen</button><br><br>`;
@@ -120,9 +134,10 @@
       const typ = document.getElementById("typ").value;
       const voraussetzungen = document.getElementById("voraussetzungen").value.split(",").map(s => s.trim()).filter(Boolean);
       const ebe = document.getElementById("ebe").value;
+      const steigern = document.getElementById("steigern").value;
       const ersatzweise = document.getElementById("ersatzweise").value.split(",").map(s => s.trim()).filter(Boolean);
 
-      if (!name || !eigenschaft1 || !eigenschaft2 || !eigenschaft3 || !ebe) {
+      if (!name || !eigenschaft1 || !eigenschaft2 || !eigenschaft3 || !ebe || !steigern) {
         alert("Bitte alle Pflichtfelder ausfüllen.");
         return;
       }
@@ -130,7 +145,7 @@
       const id = name.toLowerCase().replace(/\s+/g, "-");
       await setDoc(doc(db, "talente", id), {
         name, gruppe, eigenschaft1, eigenschaft2, eigenschaft3,
-        typ, voraussetzungen, ebe, ersatzweise
+        typ, voraussetzungen, ebe, ersatzweise, steigern
       });
 
       document.querySelectorAll("input, textarea").forEach(el => el.value = "");
