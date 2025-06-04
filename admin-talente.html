@@ -194,6 +194,63 @@
     };
 
     ladeEigenschaftsDropdowns().then(ladeTalente);
+
+    async function importiereKampftalente() {
+  const rohtext = `Name;Kategorie;Typ;Steigern;eBE;ersatzweise verwendbares Talent
+Anderthalbhänder;Bewaffneter Nahkampf;Spezial;E;BE–2;Schwerter, Zweihandschwerter/-säbel
+Armbrust;Fernkampf;Spezial;C;BE–5;Bogen
+Belagerungswaffen;Fernkampf;Spezial;D;–;–
+Blasrohr;Fernkampf;Spezial;D;BE–5;–
+Bogen;Fernkampf;Spezial;E;BE–3;–
+Diskus;Fernkampf;Spezial;D;BE–2;–
+Dolche;Bewaffneter Nahkampf;Basis;D;BE–1;Fechtwaffen, Raufen
+Fechtwaffen;Bewaffneter Nahkampf;Spezial;E;BE–1;Dolche, Schwerter
+Hiebwaffen;Bewaffneter Nahkampf;Basis;D;BE–4;Säbel
+Infanteriewaffen;Bewaffneter Nahkampf;Spezial;D;BE–3;Speere, Zweihand-Hiebwaffen
+Kettenstäbe;Bewaffneter Nahkampf;Spezial;E;BE–1;Kettenwaffen, Zweihandflegel
+Kettenwaffen;Bewaffneter Nahkampf;Spezial;D;BE–3;Kettenstäbe, Zweihandflegel
+Lanzenreiten;Bewaffneter Nahkampf;Spezial;E;–;–
+Peitsche;Bewaffneter Nahkampf;Spezial;E;BE–1;–
+Raufen;Waffenlos;Basis;C;BE;–
+Ringen;Waffenlos;Basis;D;BE;–
+Säbel;Bewaffneter Nahkampf;Basis;D;BE–2;Hiebwaffen, Schwerter
+Schleuder;Fernkampf;Spezial;E;BE–2;–
+Schwerter;Bewaffneter Nahkampf;Spezial;E;BE–2;Anderthalbhänder, Fechtwaffen, Säbel
+Speere;Bewaffneter Nahkampf;Spezial;D;BE–3;Infanteriewaffen
+Stäbe;Bewaffneter Nahkampf;Spezial;D;BE–2;Speere
+Wurfbeile;Fernkampf;Spezial;D;BE–2;Wurfspeere, Wurfmesser
+Wurfmesser;Fernkampf;Basis;C;BE–3;Wurfbeile, Wurfspeere
+Wurfspeere;Fernkampf;Spezial;C;BE–2;Wurfbeile
+Zweihandflegel;Bewaffneter Nahkampf;Spezial;D;BE–3;Infanteriewaffen, Kettenwaffen
+Zweihand-Hiebwaffen;Bewaffneter Nahkampf;Spezial;D;BE–3;Hiebwaffen, Infanteriewaffen
+Zweihandschwerter/-säbel;Bewaffneter Nahkampf;Spezial;E;BE–2;Anderthalbhänder, Schwerter, Säbel`;
+
+  const zeilen = rohtext.trim().split("\n").slice(1); // Header überspringen
+  for (const zeile of zeilen) {
+    const [name, kategorie, typ, steigern, ebe, ersatz] = zeile.split(";");
+    const id = name.toLowerCase().replace(/\s+/g, "-").replace(/[^\w\-\/]/g, "");
+
+    await setDoc(doc(db, "talente", id), {
+      name,
+      gruppe: "Kampftalente",
+      typ,
+      steigern,
+      ebe,
+      voraussetzungen: [],
+      ersatzweise: ersatz === "–" ? [] : ersatz.split(",").map(s => s.trim()),
+      eigenschaft1: null,
+      eigenschaft2: null,
+      eigenschaft3: null,
+      kategorie
+    });
+  }
+
+  alert("Import abgeschlossen!");
+}
+
+// 🟡 Einmalig ausführen
+// importiereKampftalente();
+
   </script>
 </body>
 </html>
