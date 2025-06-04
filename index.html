@@ -1,61 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Firebase DSA</title>
   <meta charset="UTF-8">
+  <title>DSA Startseite</title>
 </head>
 <body>
-  <h1>Texte aus Firebase</h1>
-
-  <div id="ausgabe"></div>
-
-  <h2>Neuen Text einsenden</h2>
-  <input type="text" id="eingabe" placeholder="Dein Text">
-  <button onclick="sendeText()">Absenden</button>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBHIftX5AvSJaPAiUIek0TBVjEtxwZo7Ow",
-      authDomain: "dsapp-6722f.firebaseapp.com",
-      databaseURL: "https://dsapp-6722f-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "dsapp-6722f",
-      storageBucket: "dsapp-6722f.firebasestorage.app",
-      messagingSenderId: "693149967345",
-      appId: "1:693149967345:web:aa784c1aa1aa105f0c5a50",
-      measurementId: "G-LJLLMTX2GT"
-    };
-
-    // Firebase initialisieren
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    const dbRef = ref(db, "nachrichten");
-
-    // Texte anzeigen
-    function ladeTexte() {
-      const ausgabe = document.getElementById("ausgabe");
-      onValue(dbRef, (snapshot) => {
-        ausgabe.innerHTML = "";
-        snapshot.forEach(childSnapshot => {
-          const eintrag = childSnapshot.val();
-          ausgabe.innerHTML += `<p>${eintrag.text}</p>`;
-        });
-      });
-    }
-
-    // Text einsenden
-    window.sendeText = function () {
-      const eingabe = document.getElementById("eingabe").value;
-      if (eingabe.trim() !== "") {
-        push(dbRef, { text: eingabe });
-        document.getElementById("eingabe").value = "";
-      }
-    }
-
-    ladeTexte();
-  </script>
+  <h1>Willkommen bei DSA</h1>
+  <p>Dies ist die Startseite.</p>
+  <a href="admin.html">Zum Adminbereich</a>
 </body>
 </html>
