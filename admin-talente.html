@@ -18,16 +18,35 @@
     <option>Sprachen/Schriften</option>
     <option>Handwerkstalente</option>
   </select><br>
-  <input id="eigenschaft1" placeholder="Eigenschaft 1 (z. B. MU)">
-  <input id="eigenschaft2" placeholder="Eigenschaft 2 (z. B. GE)">
-  <input id="eigenschaft3" placeholder="Eigenschaft 3 (z. B. KK)"><br>
+
+  <label>Eigenschaft 1:</label>
+  <select id="eigenschaft1"></select>
+  <label>Eigenschaft 2:</label>
+  <select id="eigenschaft2"></select>
+  <label>Eigenschaft 3:</label>
+  <select id="eigenschaft3"></select><br>
+
   <select id="typ">
     <option>Basis</option>
     <option>Spezial</option>
   </select><br>
+
   <textarea id="voraussetzungen" placeholder="Voraussetzungen (Komma-getrennt)"></textarea><br>
-  <input id="ebe" type="number" placeholder="eBE-Wert"><br>
-  <textarea id="ersatzweise" placeholder="Ersatzweise Talente mit Erschwernis (z. B. Reiten (-2), Klettern (-4))"></textarea><br>
+
+  <label>eBE-Wert:</label>
+  <select id="ebe">
+    <option>-</option>
+    <option>BE</option>
+    <option>BE–1</option>
+    <option>BE–2</option>
+    <option>BE–3</option>
+    <option>BE–4</option>
+    <option>BE–5</option>
+    <option>x2</option>
+  </select><br>
+
+  <textarea id="ersatzweise" placeholder="Ersatzweise Talente mit Erschwernis (Komma-getrennt)"></textarea><br>
+
   <button onclick="hinzufuegen()">Hinzufügen</button>
 
   <h2>Vorhandene Talente</h2>
@@ -50,6 +69,28 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const talenteRef = collection(db, "talente");
+    const eigenschaftenRef = collection(db, "eigenschaften");
+
+    const dropdowns = ["eigenschaft1", "eigenschaft2", "eigenschaft3"];
+
+    async function ladeEigenschaftsDropdowns() {
+      const snapshot = await getDocs(eigenschaftenRef);
+      const kuerzel = [];
+      snapshot.forEach(doc => {
+        kuerzel.push(doc.data().kuerzel);
+      });
+
+      dropdowns.forEach(id => {
+        const select = document.getElementById(id);
+        select.innerHTML = "";
+        kuerzel.forEach(k => {
+          const opt = document.createElement("option");
+          opt.value = k;
+          opt.textContent = k;
+          select.appendChild(opt);
+        });
+      });
+    }
 
     async function ladeTalente() {
       const container = document.getElementById("liste");
@@ -73,15 +114,15 @@
     window.hinzufuegen = async function () {
       const name = document.getElementById("name").value.trim();
       const gruppe = document.getElementById("gruppe").value;
-      const eigenschaft1 = document.getElementById("eigenschaft1").value.trim();
-      const eigenschaft2 = document.getElementById("eigenschaft2").value.trim();
-      const eigenschaft3 = document.getElementById("eigenschaft3").value.trim();
+      const eigenschaft1 = document.getElementById("eigenschaft1").value;
+      const eigenschaft2 = document.getElementById("eigenschaft2").value;
+      const eigenschaft3 = document.getElementById("eigenschaft3").value;
       const typ = document.getElementById("typ").value;
-      const voraussetzungen = document.getElementById("voraussetzungen").value.split(",").map(s => s.trim()).filter(s => s);
-      const ebe = parseInt(document.getElementById("ebe").value);
-      const ersatzweise = document.getElementById("ersatzweise").value.split(",").map(s => s.trim()).filter(s => s);
+      const voraussetzungen = document.getElementById("voraussetzungen").value.split(",").map(s => s.trim()).filter(Boolean);
+      const ebe = document.getElementById("ebe").value;
+      const ersatzweise = document.getElementById("ersatzweise").value.split(",").map(s => s.trim()).filter(Boolean);
 
-      if (!name || !eigenschaft1 || !eigenschaft2 || !eigenschaft3 || isNaN(ebe)) {
+      if (!name || !eigenschaft1 || !eigenschaft2 || !eigenschaft3 || !ebe) {
         alert("Bitte alle Pflichtfelder ausfüllen.");
         return;
       }
@@ -103,7 +144,7 @@
       }
     };
 
-    ladeTalente();
+    ladeEigenschaftsDropdowns().then(ladeTalente);
   </script>
 </body>
 </html>
