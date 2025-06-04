@@ -10,6 +10,7 @@
   <h2>Neues Talent hinzufügen</h2>
   <input id="name" placeholder="Name"><br>
 
+  <label>Gruppe:</label>
   <select id="gruppe">
     <option>Kampftalente</option>
     <option>Körperliche Talente</option>
@@ -20,13 +21,25 @@
     <option>Handwerkstalente</option>
   </select><br>
 
-  <label>Eigenschaft 1:</label>
-  <select id="eigenschaft1"></select>
-  <label>Eigenschaft 2:</label>
-  <select id="eigenschaft2"></select>
-  <label>Eigenschaft 3:</label>
-  <select id="eigenschaft3"></select><br>
+  <div id="eigenschafts-container">
+    <label>Eigenschaft 1:</label>
+    <select id="eigenschaft1"></select>
+    <label>Eigenschaft 2:</label>
+    <select id="eigenschaft2"></select>
+    <label>Eigenschaft 3:</label>
+    <select id="eigenschaft3"></select><br>
+  </div>
 
+  <div id="kategorie-container" style="display: none;">
+    <label>Kategorie:</label>
+    <select id="kategorie">
+      <option>Bewaffneter Nahkampf</option>
+      <option>Fernkampf</option>
+      <option>Waffenlos</option>
+    </select><br>
+  </div>
+
+  <label>Typ:</label>
   <select id="typ">
     <option>Basis</option>
     <option>Spezial</option>
@@ -106,6 +119,13 @@
       });
     }
 
+    document.getElementById("gruppe").addEventListener("change", () => {
+      const gruppe = document.getElementById("gruppe").value;
+      const isKampf = gruppe === "Kampftalente";
+      document.getElementById("eigenschafts-container").style.display = isKampf ? "none" : "block";
+      document.getElementById("kategorie-container").style.display = isKampf ? "block" : "none";
+    });
+
     async function ladeTalente() {
       const container = document.getElementById("liste");
       container.innerHTML = "";
@@ -114,10 +134,15 @@
       snapshot.forEach((eintrag) => {
         const data = eintrag.data();
         const id = eintrag.id;
+
+        const eigenschaftenText = data.gruppe === "Kampftalente"
+          ? `Kategorie: ${data.kategorie}`
+          : `Eigenschaften: ${data.eigenschaft1}, ${data.eigenschaft2}, ${data.eigenschaft3}`;
+
         const div = document.createElement("div");
         div.innerHTML = `<strong>${data.name}</strong> (${data.gruppe}) – Typ: ${data.typ}<br>
-          Eigenschaften: ${data.eigenschaft1}, ${data.eigenschaft2}, ${data.eigenschaft3}<br>
-          eBE: ${data.ebe}, Steigern: ${data.steigern} <br>
+          ${eigenschaftenText}<br>
+          eBE: ${data.ebe}, Steigern: ${data.steigern}<br>
           Voraussetzungen: ${data.voraussetzungen?.join(", ") || "Keine"}<br>
           Ersatzweise: ${data.ersatzweise?.join(", ") || "Keine"}<br>
           <button onclick="loescheTalent('${id}')">Löschen</button><br><br>`;
@@ -128,24 +153,33 @@
     window.hinzufuegen = async function () {
       const name = document.getElementById("name").value.trim();
       const gruppe = document.getElementById("gruppe").value;
-      const eigenschaft1 = document.getElementById("eigenschaft1").value;
-      const eigenschaft2 = document.getElementById("eigenschaft2").value;
-      const eigenschaft3 = document.getElementById("eigenschaft3").value;
+      const isKampf = gruppe === "Kampftalente";
+
+      let eigenschaft1 = null, eigenschaft2 = null, eigenschaft3 = null, kategorie = null;
+
+      if (isKampf) {
+        kategorie = document.getElementById("kategorie").value;
+      } else {
+        eigenschaft1 = document.getElementById("eigenschaft1").value;
+        eigenschaft2 = document.getElementById("eigenschaft2").value;
+        eigenschaft3 = document.getElementById("eigenschaft3").value;
+      }
+
       const typ = document.getElementById("typ").value;
       const voraussetzungen = document.getElementById("voraussetzungen").value.split(",").map(s => s.trim()).filter(Boolean);
       const ebe = document.getElementById("ebe").value;
       const steigern = document.getElementById("steigern").value;
       const ersatzweise = document.getElementById("ersatzweise").value.split(",").map(s => s.trim()).filter(Boolean);
 
-      if (!name || !eigenschaft1 || !eigenschaft2 || !eigenschaft3 || !ebe || !steigern) {
+      if (!name || !ebe || !steigern || (isKampf && !kategorie) || (!isKampf && (!eigenschaft1 || !eigenschaft2 || !eigenschaft3))) {
         alert("Bitte alle Pflichtfelder ausfüllen.");
         return;
       }
 
       const id = name.toLowerCase().replace(/\s+/g, "-");
       await setDoc(doc(db, "talente", id), {
-        name, gruppe, eigenschaft1, eigenschaft2, eigenschaft3,
-        typ, voraussetzungen, ebe, ersatzweise, steigern
+        name, gruppe, typ, voraussetzungen, ebe, ersatzweise, steigern,
+        eigenschaft1, eigenschaft2, eigenschaft3, kategorie
       });
 
       document.querySelectorAll("input, textarea").forEach(el => el.value = "");
