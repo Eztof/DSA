@@ -1,12 +1,88 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
-    <title>Fernkampf</title>
+  <meta charset="UTF-8">
+  <title>DSA Fernkampf-Rechner</title>
+  <style>
+    body { font-family: sans-serif; max-width: 700px; margin: auto; padding: 20px; }
+    h1 { color: darkgreen; }
+    label, select, input { display: block; margin: 10px 0; }
+    .section { margin-top: 20px; border-top: 1px solid #ccc; padding-top: 10px; }
+  </style>
 </head>
 <body>
-    <h1>Fernkampf</h1>
-    <p>Hier geht es um Fernkampf.</p>
+  <h1>Fernkampf-Rechner (DSA)</h1>
 
-    <a href="index.html">Zurück zur Startseite</a>
+  <label for="waffe">Waffe:</label>
+  <select id="waffe">
+    <option value="elfenbogen">Elfenbogen</option>
+    <option value="kurzbogen">Kurzbogen</option>
+    <option value="armbrust">Armbrust</option>
+  </select>
+
+  <label for="taw">Talentwert (TaW):</label>
+  <input type="number" id="taw" value="12">
+
+  <label for="spezialisierung">Waffenspezialisierung vorhanden?</label>
+  <select id="spezialisierung">
+    <option value="ja">Ja</option>
+    <option value="nein">Nein</option>
+  </select>
+
+  <label for="reichweite">Reichweite:</label>
+  <select id="reichweite">
+    <option value="sehr_nah">Sehr nah</option>
+    <option value="nah">Nah</option>
+    <option value="mittel">Mittel</option>
+    <option value="weit">Weit</option>
+    <option value="extrem_weit">Extrem weit</option>
+  </select>
+
+  <div class="section">
+    <label><input type="checkbox" id="pfeil"> Pfeil bereits auf Sehne</label>
+    <label><input type="checkbox" id="gespannt"> Bogen bereits gespannt</label>
+    <label><input type="checkbox" id="gurt"> Waffe am Gürtel</label>
+    <label><input type="checkbox" id="schnell"> Schnellschuss/-wurf</label>
+  </div>
+
+  <button onclick="berechneFK()">Berechnen</button>
+
+  <div id="ergebnis" class="section"></div>
+
+  <script>
+    const FK_BASIS = 9;
+    const waffen = {
+      elfenbogen: { name: "Elfenbogen", ladedauer: 3, modifikatoren: { sehr_nah: 10, nah: 3, mittel: 1, weit: -2, extrem_weit: -4 } },
+      kurzbogen: { name: "Kurzbogen", ladedauer: 3, modifikatoren: { sehr_nah: 8, nah: 2, mittel: 0, weit: -3, extrem_weit: -5 } },
+      armbrust: { name: "Armbrust", ladedauer: 4, modifikatoren: { sehr_nah: 5, nah: 1, mittel: 0, weit: -4, extrem_weit: -6 } }
+    };
+
+    function berechneFK() {
+      const wahl = document.getElementById("waffe").value;
+      const taw = parseInt(document.getElementById("taw").value);
+      const spezial = document.getElementById("spezialisierung").value === "ja" ? 2 : 0;
+      const reichweite = document.getElementById("reichweite").value;
+
+      const waffe = waffen[wahl];
+      let fk = FK_BASIS + taw + spezial + waffe.modifikatoren[reichweite];
+
+      // Aktionen berechnen
+      let aktionen = waffe.ladedauer;
+      if (document.getElementById("pfeil").checked) aktionen -= 1;
+      if (document.getElementById("gespannt").checked) aktionen -= 1;
+      if (document.getElementById("gurt").checked) aktionen += 1;
+      if (document.getElementById("schnell").checked) fk -= 1;
+
+      if (aktionen < 1) aktionen = 1;
+
+      const ausgabe = `
+        <h3>Ergebnisse</h3>
+        <p><strong>Modifizierter FK-Wert:</strong> ${fk}</p>
+        <p><strong>Benötigte Aktionen:</strong> ${aktionen}</p>
+      `;
+
+      document.getElementById("ergebnis").innerHTML = ausgabe;
+    }
+  </script>
 </body>
 </html>
