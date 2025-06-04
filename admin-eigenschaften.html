@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Eigenschaften verwalten</title>
+</head>
+<body>
+  <h1>Eigenschaften</h1>
+
+  <h2>Neue Eigenschaft hinzufügen</h2>
+  <input type="text" id="eigenschaft-id" placeholder="ID (z. B. 1)">
+  <input type="text" id="eigenschaft-name" placeholder="Name (z. B. Mut)">
+  <input type="text" id="eigenschaft-kuerzel" placeholder="Kürzel (z. B. MU)">
+  <button onclick="hinzufuegen()">Hinzufügen</button>
+
+  <h2>Vorhandene Eigenschaften</h2>
+  <div id="liste"></div>
+
+  <a href="admin.html">Zurück zum Adminbereich</a>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+      getFirestore, collection, getDocs, setDoc, deleteDoc, doc
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBHIftX5AvSJaPAiUIek0TBVjEtxwZo7Ow",
+      authDomain: "dsapp-6722f.firebaseapp.com",
+      projectId: "dsapp-6722f",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const eigenschaftenRef = collection(db, "eigenschaften");
+
+    async function ladeEigenschaften() {
+      const container = document.getElementById("liste");
+      container.innerHTML = "";
+
+      const snapshot = await getDocs(eigenschaftenRef);
+      snapshot.forEach((eintrag) => {
+        const data = eintrag.data();
+        const id = eintrag.id;
+        const div = document.createElement("div");
+        div.innerHTML = `<strong>${id}</strong>: ${data.name} (${data.kuerzel})
+          <button onclick="loescheEigenschaft('${id}')">Löschen</button>`;
+        container.appendChild(div);
+      });
+    }
+
+    window.hinzufuegen = async function () {
+      const id = document.getElementById("eigenschaft-id").value.trim();
+      const name = document.getElementById("eigenschaft-name").value.trim();
+      const kuerzel = document.getElementById("eigenschaft-kuerzel").value.trim();
+      if (!id || !name || !kuerzel) return alert("Bitte alle Felder ausfüllen.");
+
+      await setDoc(doc(db, "eigenschaften", id), {
+        name,
+        kuerzel
+      });
+
+      document.getElementById("eigenschaft-id").value = "";
+      document.getElementById("eigenschaft-name").value = "";
+      document.getElementById("eigenschaft-kuerzel").value = "";
+      ladeEigenschaften();
+    };
+
+    window.loescheEigenschaft = async function (id) {
+      if (confirm(`Eigenschaft mit ID ${id} wirklich löschen?`)) {
+        await deleteDoc(doc(db, "eigenschaften", id));
+        ladeEigenschaften();
+      }
+    };
+
+    ladeEigenschaften();
+  </script>
+</body>
+</html>
