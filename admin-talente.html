@@ -26,6 +26,7 @@
       display: block;
       margin-top: 0.5rem;
       font-weight: bold;
+      font-size: 0.95rem;
     }
 
     select, input, textarea {
@@ -50,11 +51,13 @@
       margin-bottom: 0.6rem;
     }
 
-    .row > * {
-      flex: 1 1 calc(33.333% - 1rem);
+    /* Drei Spalten-Felder nehmen jeweils 33% Breite minus Spacing */
+    .col-3 {
+      flex: 1 1 calc(33.333% - 0.7rem);
     }
 
-    .row .full {
+    /* Volle Breite für Textareas */
+    .col-1 {
       flex: 1 1 100%;
     }
 
@@ -78,6 +81,7 @@
       width: 100%;
       border-collapse: collapse;
       margin-top: 1.5rem;
+      font-size: 0.95rem;
     }
 
     th, td {
@@ -85,7 +89,6 @@
       border-bottom: 1px solid #ccc;
       text-align: left;
       vertical-align: middle;
-      font-size: 0.95rem;
     }
 
     th {
@@ -93,12 +96,13 @@
     }
 
     td input {
-      width: 80px;
+      width: 100%;
       font-size: 0.9rem;
       padding: 0.3rem;
       margin: 0;
       border: 1px solid #ccc;
       border-radius: 3px;
+      box-sizing: border-box;
     }
 
     .actions button {
@@ -121,7 +125,7 @@
     }
 
     @media (max-width: 600px) {
-      .row > * {
+      .col-3 {
         flex: 1 1 100%;
       }
       td input {
@@ -138,6 +142,7 @@
     <!-- Kategorie-Auswahl -->
     <label for="kategorieSelect">Kategorie wählen:</label>
     <select id="kategorieSelect" onchange="ladeTalente()">
+      <!-- Die Values müssen exakt euren Collection-Namen entsprechen -->
       <option value="Kampftalente">Kampftalente</option>
       <option value="KoerperlicheTalente">Körperliche Talente</option>
       <option value="GesellschaftlicheTalente">Gesellschaftliche Talente</option>
@@ -146,51 +151,51 @@
       <option value="Handwerkstalente">Handwerkstalente</option>
     </select>
 
-    <!-- Neues Talent hinzufügen -->
+    <!-- Neuen Datensatz anlegen -->
     <h2>Neues Talent hinzufügen</h2>
     <div class="row">
-      <div>
+      <div class="col-3">
         <label for="inputName">Name *</label>
         <input type="text" id="inputName" placeholder="z. B. Klettern">
       </div>
-      <div>
+      <div class="col-3">
         <label for="inputTyp">Typ *</label>
         <input type="text" id="inputTyp" placeholder="Basis / Spezial">
       </div>
-      <div>
+      <div class="col-3">
         <label for="inputSteigerung">Steigerung *</label>
         <input type="text" id="inputSteigerung" placeholder="z. B. D">
       </div>
     </div>
 
     <div class="row">
-      <div>
+      <div class="col-3">
         <label for="inputEBE">eBE-Wert</label>
         <input type="text" id="inputEBE" placeholder="z. B. BE–2 oder BEx2">
       </div>
-      <div>
+      <div class="col-3">
         <label for="inputEig1">Eigenschaft 1</label>
         <input type="text" id="inputEig1" placeholder="z. B. MU">
       </div>
-      <div>
+      <div class="col-3">
         <label for="inputEig2">Eigenschaft 2</label>
         <input type="text" id="inputEig2" placeholder="z. B. GE">
       </div>
-      <div>
+      <div class="col-3">
         <label for="inputEig3">Eigenschaft 3</label>
         <input type="text" id="inputEig3" placeholder="z. B. KK">
       </div>
     </div>
 
     <div class="row">
-      <div class="full">
+      <div class="col-1">
         <label for="inputVoraussetzungen">Voraussetzungen</label>
         <textarea id="inputVoraussetzungen" placeholder="Komma-getrennt, z. B. „Körperbeherrschung 4, Sinnenschärfe 3“"></textarea>
       </div>
     </div>
 
     <div class="row">
-      <div class="full">
+      <div class="col-1">
         <label for="inputErsatzweise">Ersatzweise Talente</label>
         <textarea id="inputErsatzweise" placeholder="Komma-getrennt, z. B. „Athletik, Akrobatik“"></textarea>
       </div>
@@ -213,7 +218,7 @@
         </tr>
       </thead>
       <tbody id="talentTabelle">
-        <!-- Zeilen werden dynamisch erzeugt -->
+        <!-- Zeilen werden dynamisch eingefügt -->
       </tbody>
     </table>
 
@@ -259,16 +264,26 @@
         const id = docSnap.id;
         const data = docSnap.data();
 
-        // Bei JSON-Struktur: data.steigerung, data.ebe, data.eigenschaft_1 etc.
+        // Fallbacks: Manche Dokumente haben vielleicht "eigenschaft1" statt "eigenschaft_1"
         const name        = data.name || "";
         const typ         = data.typ || "";
-        const steigerung  = data.steigerung || "";
+        const steigerung  = data.steigerung || data.steigern || "";  
         const ebe         = data.ebe || "";
-        const e1          = data.eigenschaft_1 || "";
-        const e2          = data.eigenschaft_2 || "";
-        const e3          = data.eigenschaft_3 || "";
-        const voraus      = Array.isArray(data.voraussetzungen) ? data.voraussetzungen.join(", ") : "";
-        const ersatz      = Array.isArray(data.ersatzweise)     ? data.ersatzweise.join(", ")     : "";
+        const e1          = data.eigenschaft_1   ?? data.eigenschaft1   ?? "";
+        const e2          = data.eigenschaft_2   ?? data.eigenschaft2   ?? "";
+        const e3          = data.eigenschaft_3   ?? data.eigenschaft3   ?? "";
+        const voraus      = Array.isArray(data.voraussetzungen)
+                             ? data.voraussetzungen.join(", ")
+                             : (typeof data.voraussetzungen === "string"
+                                ? data.voraussetzungen
+                                : "");
+        const ersatz      = Array.isArray(data.ersatzweise)
+                             ? data.ersatzweise.join(", ")
+                             : (Array.isArray(data.verwandteTalente)
+                                ? data.verwandteTalente.join(", ")
+                                : (typeof data.ersatzweise === "string"
+                                   ? data.ersatzweise
+                                   : ""));
 
         const row = document.createElement("tr");
         row.innerHTML = `
@@ -293,34 +308,34 @@
     }
 
     /**
-     * Fügt ein neues Talent in die ausgewählte Kategorie ein.
-     * Liest alle Felder aus, sichert in Firestore und lädt die Tabelle neu.
+     * Fügt ein neues Talent in die ausgewählte Kategorie (Collection) ein.
      */
     window.hinzufuegenTalent = async function () {
       const kategorie = document.getElementById("kategorieSelect").value;
-      const name              = document.getElementById("inputName").value.trim();
-      const typ               = document.getElementById("inputTyp").value.trim();
-      const steigerung        = document.getElementById("inputSteigerung").value.trim();
-      const ebe               = document.getElementById("inputEBE").value.trim();
-      const eig1              = document.getElementById("inputEig1").value.trim();
-      const eig2              = document.getElementById("inputEig2").value.trim();
-      const eig3              = document.getElementById("inputEig3").value.trim();
-      const voraussetzungen   = document.getElementById("inputVoraussetzungen").value
-                                .split(",")
-                                .map(s => s.trim())
-                                .filter(Boolean);
-      const ersatzweiseTalente = document.getElementById("inputErsatzweise").value
-                                .split(",")
-                                .map(s => s.trim())
-                                .filter(Boolean);
+      const name       = document.getElementById("inputName").value.trim();
+      const typ        = document.getElementById("inputTyp").value.trim();
+      const steigerung = document.getElementById("inputSteigerung").value.trim();
+      const ebe        = document.getElementById("inputEBE").value.trim();
+      const eig1       = document.getElementById("inputEig1").value.trim();
+      const eig2       = document.getElementById("inputEig2").value.trim();
+      const eig3       = document.getElementById("inputEig3").value.trim();
+
+      const vorausArray = document.getElementById("inputVoraussetzungen").value
+                            .split(",")
+                            .map(s => s.trim())
+                            .filter(Boolean);
+      const ersatzArray = document.getElementById("inputErsatzweise").value
+                            .split(",")
+                            .map(s => s.trim())
+                            .filter(Boolean);
 
       // Pflichtfelder prüfen
       if (!name || !typ || !steigerung) {
-        alert("Bitte mindestens Name, Typ und Steigerung ausfüllen.");
+        alert("Bitte fülle mindestens Name, Typ und Steigerung aus.");
         return;
       }
 
-      // ID aus Namen generieren
+      // ID automatisch aus dem Namen generieren
       const id = name.toLowerCase().replace(/\s+/g, "-");
 
       await setDoc(
@@ -333,12 +348,12 @@
           eigenschaft_1: eig1,
           eigenschaft_2: eig2,
           eigenschaft_3: eig3,
-          voraussetzungen,
-          ersatzweise: ersatzweiseTalente
+          voraussetzungen: vorausArray,
+          ersatzweise: ersatzArray
         }
       );
 
-      // Felder leeren
+      // Eingabefelder zurücksetzen
       document.getElementById("inputName").value = "";
       document.getElementById("inputTyp").value = "";
       document.getElementById("inputSteigerung").value = "";
@@ -363,14 +378,15 @@
       const e1          = document.getElementById(`e1-${id}`).value.trim();
       const e2          = document.getElementById(`e2-${id}`).value.trim();
       const e3          = document.getElementById(`e3-${id}`).value.trim();
-      const voraus      = document.getElementById(`voraus-${id}`).value
-                          .split(",")
-                          .map(s => s.trim())
-                          .filter(Boolean);
-      const ersatz      = document.getElementById(`ersatz-${id}`).value
-                          .split(",")
-                          .map(s => s.trim())
-                          .filter(Boolean);
+
+      const vorausArray = document.getElementById(`voraus-${id}`).value
+                            .split(",")
+                            .map(s => s.trim())
+                            .filter(Boolean);
+      const ersatzArray = document.getElementById(`ersatz-${id}`).value
+                            .split(",")
+                            .map(s => s.trim())
+                            .filter(Boolean);
 
       if (!name || !typ || !steigerung) {
         alert("Name, Typ und Steigerung dürfen nicht leer sein.");
@@ -387,8 +403,8 @@
           eigenschaft_1: e1,
           eigenschaft_2: e2,
           eigenschaft_3: e3,
-          voraussetzungen: voraus,
-          ersatzweise: ersatz
+          voraussetzungen: vorausArray,
+          ersatzweise: ersatzArray
         }
       );
 
@@ -397,17 +413,17 @@
     };
 
     /**
-     * Löscht das Talent-Dokument aus Firestore und lädt die Tabelle neu.
+     * Löscht ein Talent-Dokument aus Firestore und lädt neu.
      */
     window.loescheTalent = async function (kategorie, id) {
-      if (confirm(`Talent "${id}" wirklich löschen?`)) {
+      if (confirm(`Talent mit ID "${id}" wirklich löschen?`)) {
         await deleteDoc(doc(db, kategorie, id));
         ladeTalente();
       }
     };
 
-    // Beim ersten Laden gleich die aktuell ausgewählte Kategorie anzeigen
-    ladeTalente();
+    // Beim ersten Laden direkt die aktuell gewählte Kategorie zeigen
+    window.addEventListener("load", ladeTalente);
   </script>
 </body>
 </html>
