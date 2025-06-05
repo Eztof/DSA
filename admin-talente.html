@@ -6,214 +6,172 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f4f6f9;
+      background-color: #f9fafc;
       margin: 0;
       padding: 2rem;
       color: #333;
     }
 
-    h1 {
+    h1, h2 {
       text-align: center;
-      margin-bottom: 2rem;
     }
 
     .container {
-      max-width: 1000px;
+      max-width: 960px;
       margin: auto;
     }
 
-    input, select, textarea {
+    label, select, input, textarea, button {
+      display: block;
+      width: 100%;
+      margin: 0.3rem 0;
       padding: 0.5rem;
-      margin: 0.3rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-
-    textarea {
-      resize: vertical;
+      font-size: 1rem;
     }
 
     button {
-      padding: 0.5rem 1rem;
       background-color: #2d6cdf;
       color: white;
       border: none;
       border-radius: 4px;
       cursor: pointer;
-      margin: 0.3rem;
     }
 
     button:hover {
       background-color: #1f4fb8;
     }
 
-    .flex {
+    .flex-row {
       display: flex;
       gap: 0.5rem;
       flex-wrap: wrap;
-      align-items: center;
+      margin-bottom: 1rem;
     }
 
-    .talent-row {
-      display: flex;
-      flex-wrap: wrap;
-      border-bottom: 1px solid #ccc;
-      padding: 0.5rem 0;
-      align-items: center;
+    .flex-row > * {
+      flex: 1;
+      min-width: 150px;
     }
 
-    .talent-row input {
-      width: 120px;
-    }
-
-    .eigenschaften-group input {
-      width: 60px;
-      margin-right: 0.3rem;
+    .talent {
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      background-color: #fff;
     }
 
     .back-link {
-      display: block;
       text-align: center;
       margin-top: 2rem;
-      text-decoration: none;
-      color: #2d6cdf;
-    }
-
-    .back-link:hover {
-      text-decoration: underline;
+      display: block;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Talente verwalten</h1>
+<div class="container">
+  <h1>Talente verwalten</h1>
 
-    <label for="kategorieSelect">Kategorie wählen:</label>
-    <select id="kategorieSelect" onchange="ladeTalente()">
-      <option value="Kampftalente">Kampftalente</option>
-      <option value="KoerperlicheTalente">Körperliche Talente</option>
-      <option value="GesellschaftlicheTalente">Gesellschaftliche Talente</option>
-      <option value="Naturtalente">Natur-Talente</option>
-      <option value="Wissenstalente">Wissenstalente</option>
-      <option value="Handwerkstalente">Handwerkstalente</option>
-    </select>
+  <label for="kategorieSelect">Talentgruppe wählen:</label>
+  <select id="kategorieSelect">
+    <option value="Kampftalente">Kampftalente</option>
+    <option value="KoerperlicheTalente">Körperliche Talente</option>
+    <option value="GesellschaftlicheTalente">Gesellschaftliche Talente</option>
+    <option value="Naturtalente">Natur-Talente</option>
+    <option value="Wissenstalente">Wissenstalente</option>
+    <option value="Handwerkstalente">Handwerkstalente</option>
+  </select>
 
-    <h2>Neues Talent hinzufügen</h2>
-    <div class="flex">
-      <input id="name" placeholder="Name">
-      <input id="typ" placeholder="Typ">
-      <input id="steigern" placeholder="Steigern">
-      <input id="ebe" placeholder="eBE-Wert">
-    </div>
-    <div class="flex eigenschaften-group">
-      <input id="eigenschaft1" placeholder="Eigenschaft 1">
-      <input id="eigenschaft2" placeholder="Eigenschaft 2">
-      <input id="eigenschaft3" placeholder="Eigenschaft 3">
-    </div>
-    <textarea id="voraussetzungen" placeholder="Voraussetzungen (Komma-getrennt)"></textarea>
-    <textarea id="ersatzweise" placeholder="Ersatzweise Talente (Komma-getrennt)"></textarea>
-    <button onclick="hinzufuegenTalent()">Hinzufügen</button>
-
-    <h2>Vorhandene Talente</h2>
-    <div id="talentListe"></div>
-
-    <a class="back-link" href="admin.html">Zurück zum Adminbereich</a>
+  <h2>Neues Talent hinzufügen</h2>
+  <div class="flex-row">
+    <input id="name" placeholder="Name">
+    <input id="typ" placeholder="Typ">
+    <input id="steigern" placeholder="Steigerungskosten">
   </div>
+  <div class="flex-row">
+    <input id="eigenschaft1" placeholder="Eigenschaft 1">
+    <input id="eigenschaft2" placeholder="Eigenschaft 2">
+    <input id="eigenschaft3" placeholder="Eigenschaft 3">
+  </div>
+  <textarea id="voraussetzungen" placeholder="Voraussetzungen (Komma-getrennt)"></textarea>
+  <textarea id="ersatzweise" placeholder="Ersatzweise Talente (Komma-getrennt)"></textarea>
+  <button onclick="hinzufuegenTalent()">Talent hinzufügen</button>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import {
-      getFirestore, collection, getDocs, setDoc, updateDoc, deleteDoc, doc
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  <h2>Talente der gewählten Gruppe</h2>
+  <div id="talentListe"></div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBHIftX5AvSJaPAiUIek0TBVjEtxwZo7Ow",
-      authDomain: "dsapp-6722f.firebaseapp.com",
-      projectId: "dsapp-6722f"
-    };
+  <a href="admin.html" class="back-link">Zurück zum Adminbereich</a>
+</div>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getFirestore, collection, getDocs, setDoc, updateDoc, deleteDoc, doc
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    async function ladeTalente() {
-      const kategorie = document.getElementById("kategorieSelect").value;
-      const ref = collection(db, kategorie);
-      const snapshot = await getDocs(ref);
-      const container = document.getElementById("talentListe");
-      container.innerHTML = "";
+  const firebaseConfig = {
+    apiKey: "AIzaSyBHIftX5AvSJaPAiUIek0TBVjEtxwZo7Ow",
+    authDomain: "dsapp-6722f.firebaseapp.com",
+    projectId: "dsapp-6722f"
+  };
 
-      snapshot.forEach(docSnap => {
-        const id = docSnap.id;
-        const data = docSnap.data();
-        const div = document.createElement("div");
-        div.className = "talent-row";
-        div.innerHTML = `
-          <input id="name-${id}" value="${data.name || ''}">
-          <input id="typ-${id}" value="${data.typ || ''}">
-          <input id="steigern-${id}" value="${data.steigern || ''}">
-          <input id="ebe-${id}" value="${data.ebe || ''}">
-          <div class="eigenschaften-group">
-            <input id="e1-${id}" value="${data.eigenschaft1 || ''}">
-            <input id="e2-${id}" value="${data.eigenschaft2 || ''}">
-            <input id="e3-${id}" value="${data.eigenschaft3 || ''}">
-          </div>
-          <button onclick="speichereTalent('${id}')">Speichern</button>
-          <button onclick="loescheTalent('${id}')">Löschen</button>
-        `;
-        container.appendChild(div);
-      });
-    }
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-    window.hinzufuegenTalent = async function () {
-      const kategorie = document.getElementById("kategorieSelect").value;
-      const name = document.getElementById("name").value.trim();
-      const typ = document.getElementById("typ").value.trim();
-      const steigern = document.getElementById("steigern").value.trim();
-      const ebe = document.getElementById("ebe").value.trim();
-      const eigenschaft1 = document.getElementById("eigenschaft1").value.trim();
-      const eigenschaft2 = document.getElementById("eigenschaft2").value.trim();
-      const eigenschaft3 = document.getElementById("eigenschaft3").value.trim();
-      const voraussetzungen = document.getElementById("voraussetzungen").value.split(",").map(s => s.trim()).filter(Boolean);
-      const ersatzweise = document.getElementById("ersatzweise").value.split(",").map(s => s.trim()).filter(Boolean);
+  document.getElementById("kategorieSelect").addEventListener("change", ladeTalente);
+  window.addEventListener("DOMContentLoaded", ladeTalente);
 
-      if (!name) {
-        alert("Name fehlt");
-        return;
-      }
+  async function ladeTalente() {
+    const gruppe = document.getElementById("kategorieSelect").value;
+    const ref = collection(db, gruppe);
+    const snapshot = await getDocs(ref);
+    const container = document.getElementById("talentListe");
+    container.innerHTML = "";
 
-      const id = name.toLowerCase().replace(/\s+/g, "-");
-      await setDoc(doc(db, kategorie, id), {
-        name, typ, steigern, ebe,
-        eigenschaft1, eigenschaft2, eigenschaft3,
-        voraussetzungen, ersatzweise
-      });
+    snapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      const id = docSnap.id;
 
-      ladeTalente();
-    };
+      const div = document.createElement("div");
+      div.className = "talent";
+      div.innerHTML = `
+        <strong>${data.name}</strong><br>
+        Typ: ${data.typ || ""} | Steigern: ${data.steigern || ""}<br>
+        Eigenschaften: ${data.eigenschaft1 || ""}, ${data.eigenschaft2 || ""}, ${data.eigenschaft3 || ""}<br>
+        Voraussetzungen: ${(data.voraussetzungen || []).join(", ")}<br>
+        Ersatzweise: ${(data.ersatzweise || []).join(", ")}<br>
+        <button onclick="loescheTalent('${gruppe}', '${id}')">Löschen</button>
+      `;
+      container.appendChild(div);
+    });
+  }
 
-    window.speichereTalent = async function (id) {
-      const kategorie = document.getElementById("kategorieSelect").value;
-      const name = document.getElementById(`name-${id}`).value.trim();
-      const typ = document.getElementById(`typ-${id}`).value.trim();
-      const steigern = document.getElementById(`steigern-${id}`).value.trim();
-      const ebe = document.getElementById(`ebe-${id}`).value.trim();
-      const eigenschaft1 = document.getElementById(`e1-${id}`).value.trim();
-      const eigenschaft2 = document.getElementById(`e2-${id}`).value.trim();
-      const eigenschaft3 = document.getElementById(`e3-${id}`).value.trim();
+  window.hinzufuegenTalent = async function () {
+    const gruppe = document.getElementById("kategorieSelect").value;
+    const name = document.getElementById("name").value.trim();
+    const typ = document.getElementById("typ").value.trim();
+    const steigern = document.getElementById("steigern").value.trim();
+    const eigenschaft1 = document.getElementById("eigenschaft1").value.trim();
+    const eigenschaft2 = document.getElementById("eigenschaft2").value.trim();
+    const eigenschaft3 = document.getElementById("eigenschaft3").value.trim();
+    const voraussetzungen = document.getElementById("voraussetzungen").value.split(",").map(s => s.trim()).filter(Boolean);
+    const ersatzweise = document.getElementById("ersatzweise").value.split(",").map(s => s.trim()).filter(Boolean);
 
-      await updateDoc(doc(db, kategorie, id), {
-        name, typ, steigern, ebe,
-        eigenschaft1, eigenschaft2, eigenschaft3
-      });
-    };
+    if (!name) return alert("Name fehlt");
 
-    window.loescheTalent = async function (id) {
-      const kategorie = document.getElementById("kategorieSelect").value;
-      await deleteDoc(doc(db, kategorie, id));
-      ladeTalente();
-    };
-
+    const id = name.toLowerCase().replace(/\s+/g, "-");
+    await setDoc(doc(db, gruppe, id), {
+      name, typ, steigern, eigenschaft1, eigenschaft2, eigenschaft3, voraussetzungen, ersatzweise
+    });
     ladeTalente();
-  </script>
+  };
+
+  window.loescheTalent = async function (gruppe, id) {
+    if (confirm(`Talent "${id}" wirklich löschen?`)) {
+      await deleteDoc(doc(db, gruppe, id));
+      ladeTalente();
+    }
+  };
+</script>
 </body>
 </html>
