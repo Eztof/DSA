@@ -141,10 +141,11 @@
         const div = document.createElement("div");
         div.className = "talent-entry";
         div.innerHTML = `
-          <strong>${data.name}</strong> (${data.typ || ""}, ${data.steigern || "-"}, ${data.ebe || "-"})<br>
-          Eigenschaften: ${data.eigenschaft1 || "-"}, ${data.eigenschaft2 || "-"}, ${data.eigenschaft3 || "-"}<br>
-          Voraussetzungen: ${(data.voraussetzungen || []).join(", ")}<br>
-          Ersatzweise: ${(data.ersatzweise || []).join(", ")}<br>
+          <strong>${data.name}</strong><br>
+          <em>Typ:</em> ${data.typ || "-"} &nbsp;|&nbsp; <em>Steigerung:</em> ${data.steigern || "-"} &nbsp;|&nbsp; <em>eBE:</em> ${data.ebe || "-"}<br>
+          <em>Eigenschaften:</em> ${data.eigenschaft_1 || data.eigenschaft1 || "-"}, ${data.eigenschaft_2 || data.eigenschaft2 || "-"}, ${data.eigenschaft_3 || data.eigenschaft3 || "-"}<br>
+          <em>Voraussetzungen:</em> ${(data.voraussetzungen || []).join(", ")}<br>
+          <em>Ersatzweise:</em> ${(data.ersatzweise || []).join(", ")}<br>
           <button onclick="loescheTalent('${kategorie}', '${id}')">Löschen</button>
         `;
         container.appendChild(div);
@@ -167,7 +168,10 @@
       const id = name.toLowerCase().replace(/\s+/g, "-");
 
       await setDoc(doc(db, kategorie, id), {
-        name, typ, steigern, ebe, eigenschaft1, eigenschaft2, eigenschaft3,
+        name, typ, steigern, ebe,
+        eigenschaft_1: eigenschaft1,
+        eigenschaft_2: eigenschaft2,
+        eigenschaft_3: eigenschaft3,
         voraussetzungen, ersatzweise
       });
       ladeTalente();
