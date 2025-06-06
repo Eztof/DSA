@@ -1,0 +1,81 @@
+<!-- admin.html -->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin-Bereich</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 2rem;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .nav {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .nav a {
+      text-decoration: none;
+      padding: 0.7rem 1.2rem;
+      background-color: #2d6cdf;
+      color: white;
+      border-radius: 4px;
+      transition: background-color 0.2s ease;
+      font-size: 1rem;
+    }
+
+    .nav a:hover {
+      background-color: #1f4fb8;
+    }
+
+    .content {
+      text-align: center;
+      font-size: 1.1rem;
+      color: #555;
+    }
+
+    .logout {
+      margin-top: 2rem;
+      text-align: center;
+    }
+
+    .logout a {
+      color: #c33;
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.2s ease;
+    }
+
+    .logout a:hover {
+      color: #900;
+    }
+  </style>
+</head>
+<body>
+  <h1>Admin-Bereich</h1>
+  <nav class="nav">
+    <a href="admin/eigenschaften.html">Eigenschaften</a>
+    <a href="admin/talente.html">Talente</a>
+    <a href="admin/spielerverwaltung.html">Spielerverwaltung</a>
+  </nav>
+
+  <div class="content">
+    <p>Wähle oben eine Kategorie, um sie zu verwalten.</p>
+  </div>
+
+  <div class="logout">
+    <a href="index.html">← Zurück zur Startseite (Abmelden)</a>
+  </div>
+</body>
+</html>
