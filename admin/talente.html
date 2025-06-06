@@ -1,0 +1,159 @@
+<!-- admin/talente.html -->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Talente verwalten</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f9;
+      margin: 0; padding: 1.5rem; color: #333;
+    }
+    h1 { text-align: center; margin-bottom: 1rem; }
+    .container { max-width: 900px; margin: auto; }
+    label { display: block; margin-top: 0.5rem; font-weight: bold; }
+    select, input, textarea {
+      padding: 0.4rem; margin-top: 0.3rem; border: 1px solid #ccc; border-radius: 4px;
+      font-size: 0.95rem; width: 100%; box-sizing: border-box;
+    }
+    textarea { resize: vertical; min-height: 3rem; }
+    .row {
+      display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.6rem;
+    }
+    .col-3 { flex: 1 1 calc(33.333% - 0.7rem); }
+    .col-1 { flex: 1 1 100%; }
+    button {
+      margin-top: 0.6rem; padding: 0.6rem 1.2rem; background-color: #2d6cdf;
+      color: white; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    button:hover { background-color: #1f4fb8; }
+    table {
+      width: 100%; border-collapse: collapse; margin-top: 1.5rem; font-size: 0.95rem;
+    }
+    th, td {
+      padding: 0.6rem; border-bottom: 1px solid #ccc; text-align: left; vertical-align: middle;
+    }
+    th { background-color: #eef2f7; }
+    td input {
+      width: 100%; font-size: 0.9rem; padding: 0.3rem; margin: 0; border: 1px solid #ccc; border-radius: 3px;
+      box-sizing: border-box;
+    }
+    .actions button {
+      margin-right: 0.3rem; padding: 0.4rem 0.8rem; font-size: 0.85rem;
+    }
+    .back-link {
+      display: block; text-align: center; margin-top: 2rem; text-decoration: none; color: #2d6cdf; font-weight: bold;
+    }
+    .back-link:hover { text-decoration: underline; }
+    @media (max-width: 600px) {
+      .col-3 { flex: 1 1 100%; }
+      td input { width: 100%; margin-bottom: 0.3rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Talente verwalten</h1>
+
+    <label for="kategorieSelect">Kategorie wählen:</label>
+    <select id="kategorieSelect" onchange="ladeTalente(this.value)">
+      <option value="Kampftalente">Kampftalente</option>
+      <option value="KoerperlicheTalente">Körperliche Talente</option>
+      <option value="GesellschaftlicheTalente">Gesellschaftliche Talente</option>
+      <option value="Naturtalente">Natur-Talente</option>
+      <option value="Wissenstalente">Wissenstalente</option>
+      <option value="Handwerkstalente">Handwerkstalente</option>
+    </select>
+
+    <h2>Neues Talent hinzufügen</h2>
+    <div class="row">
+      <div class="col-3">
+        <label for="inputName">Name *</label>
+        <input type="text" id="inputName" placeholder="z. B. Klettern">
+      </div>
+      <div class="col-3">
+        <label for="inputTyp">Typ *</label>
+        <input type="text" id="inputTyp" placeholder="Basis / Spezial">
+      </div>
+      <div class="col-3">
+        <label for="inputSteigerung">Steigerung *</label>
+        <input type="text" id="inputSteigerung" placeholder="z. B. D">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-3">
+        <label for="inputEBE">eBE-Wert</label>
+        <input type="text" id="inputEBE" placeholder="z. B. BE–2">
+      </div>
+      <div class="col-3">
+        <label for="inputEig1">Eigenschaft 1</label>
+        <input type="text" id="inputEig1" placeholder="z. B. MU">
+      </div>
+      <div class="col-3">
+        <label for="inputEig2">Eigenschaft 2</label>
+        <input type="text" id="inputEig2" placeholder="z. B. GE">
+      </div>
+      <div class="col-3">
+        <label for="inputEig3">Eigenschaft 3</label>
+        <input type="text" id="inputEig3" placeholder="z. B. KK">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-1">
+        <label for="inputVoraussetzungen">Voraussetzungen</label>
+        <textarea id="inputVoraussetzungen" placeholder="Komma-getrennt, z. B. „Körperbeherrschung 4, Sinnenschärfe 3“"></textarea>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-1">
+        <label for="inputErsatzweise">Ersatzweise Talente</label>
+        <textarea id="inputErsatzweise" placeholder="Komma-getrennt, z. B. „Athletik, Akrobatik“"></textarea>
+      </div>
+    </div>
+    <button onclick="hinzufuegenTalent(document.getElementById('kategorieSelect').value)">Talent hinzufügen</button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Typ</th>
+          <th>Steigerung</th>
+          <th>eBE</th>
+          <th>Eigenschaften</th>
+          <th>Voraussetzungen</th>
+          <th>Ersatzweise</th>
+          <th>Aktionen</th>
+        </tr>
+      </thead>
+      <tbody id="talentTabelle">
+        <!-- Dynamisch gefüllt -->
+      </tbody>
+    </table>
+
+    <a class="back-link" href="../index.html">← Zurück zum Adminbereich</a>
+  </div>
+
+  <script type="module">
+    import {
+      ladeTalente,
+      hinzufuegenTalent,
+      speichereTalent,
+      loescheTalent
+    } from "../scripts/talente.js";
+
+    // Beim ersten Laden: Standardkategorie laden
+    window.addEventListener("load", () => {
+      const defaultKat = document.getElementById("kategorieSelect").value;
+      ladeTalente(defaultKat);
+    });
+
+    // Wir binden die Funktionsaufrufe an window, damit die Buttons in den Tabellenzeilen sie finden:
+    window.ladeTalente = ladeTalente;
+    window.hinzufuegenTalent = hinzufuegenTalent;
+    window.speichereTalent = speichereTalent;
+    window.loescheTalent = loescheTalent;
+  </script>
+</body>
+</html>
