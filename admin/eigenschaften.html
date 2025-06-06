@@ -1,0 +1,93 @@
+<!-- admin/eigenschaften.html -->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Eigenschaften verwalten</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f9;
+      margin: 0; padding: 1.5rem; color: #333;
+    }
+    h1 { text-align: center; margin-bottom: 1rem; }
+    .container { max-width: 800px; margin: auto; }
+    label { display: block; margin-top: 0.5rem; font-weight: bold; }
+    input[type="text"] {
+      padding: 0.5rem; margin-top: 0.3rem; border: 1px solid #ccc; border-radius: 4px;
+      width: 100%; box-sizing: border-box;
+    }
+    button {
+      margin-top: 0.6rem; padding: 0.6rem 1.2rem; background-color: #2d6cdf;
+      color: white; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    button:hover { background-color: #1f4fb8; }
+    table {
+      width: 100%; border-collapse: collapse; margin-top: 1.5rem; font-size: 0.95rem;
+    }
+    th, td {
+      padding: 0.6rem; border-bottom: 1px solid #ccc; text-align: left; vertical-align: middle;
+    }
+    th { background-color: #eef2f7; }
+    td input {
+      width: 100%; font-size: 0.9rem; padding: 0.3rem; margin: 0; border: 1px solid #ccc; border-radius: 3px;
+      box-sizing: border-box;
+    }
+    .actions button {
+      margin-right: 0.3rem; padding: 0.4rem 0.8rem; font-size: 0.85rem;
+    }
+    .back-link {
+      display: block; text-align: center; margin-top: 2rem; text-decoration: none; color: #2d6cdf; font-weight: bold;
+    }
+    .back-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Eigenschaften verwalten</h1>
+
+    <label for="eigenschaft-name">Name *</label>
+    <input type="text" id="eigenschaft-name" placeholder="z. B. Klugheit">
+
+    <label for="eigenschaft-kuerzel">Kürzel *</label>
+    <input type="text" id="eigenschaft-kuerzel" placeholder="z. B. KL">
+
+    <label for="eigenschaft-beschreibung">Beschreibung</label>
+    <input type="text" id="eigenschaft-beschreibung" placeholder="Kurzbeschreibung">
+
+    <button onclick="hinzufuegenEigenschaft()">Hinzufügen</button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Kürzel</th>
+          <th>Beschreibung</th>
+          <th>Aktionen</th>
+        </tr>
+      </thead>
+      <tbody id="eigenschaftenListe"></tbody>
+    </table>
+
+    <a class="back-link" href="talente.html">← Weiter zu Talente</a>
+  </div>
+
+  <script type="module">
+    import {
+      ladeEigenschaften,
+      hinzufuegenEigenschaft,
+      aktualisiereEigenschaft,
+      loescheEigenschaft
+    } from "../scripts/eigenschaften.js";
+
+    // Beim Laden: alle Eigenschaften anzeigen
+    window.addEventListener("load", ladeEigenschaften);
+
+    // Fensterfunktionen für Buttons:
+    window.hinzufuegenEigenschaft = hinzufuegenEigenschaft;
+    window.aktualisiereEigenschaft = aktualisiereEigenschaft;
+    window.loescheEigenschaft = loescheEigenschaft;
+  </script>
+</body>
+</html>
