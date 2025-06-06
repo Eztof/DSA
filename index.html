@@ -10,100 +10,128 @@
       background: linear-gradient(to right, #e3eaf1, #f9fbfc);
       color: #333;
       margin: 0;
-      padding: 0;
+      padding: 2rem;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2.5em;
+      margin-bottom: 1rem;
+    }
+    #spielerContainer {
       display: flex;
-      flex-direction: column;
-      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
       justify-content: center;
-      height: 100vh;
     }
-    h1 { font-size: 3em; margin-bottom: 0.2em; }
-    p { font-size: 1.2em; margin-bottom: 1.5em; }
-    button {
-      background-color: #2d6cdf;
-      color: white;
-      padding: 0.7em 1.4em;
-      border: none;
-      border-radius: 8px;
-      font-size: 1em;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      margin-bottom: 1em;
-    }
-    button:hover { background-color: #1f4fb8; }
-    #codePrompt {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-    }
-    input {
-      padding: 0.5em;
-      font-size: 1em;
-      margin-bottom: 0.5em;
+    .spielerCard {
+      background-color: white;
       border: 1px solid #ccc;
       border-radius: 6px;
+      padding: 1rem 1.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+      font-size: 1rem;
+      text-align: center;
+      min-width: 160px;
     }
-    #error { color: red; margin-top: 0.5em; }
+    .spielerCard:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    #error {
+      color: red;
+      text-align: center;
+      margin-top: 1rem;
+    }
   </style>
 </head>
 <body>
-  <h1>Willkommen bei DSA</h1>
-  <p>Bitte gib das Admin-Passwort ein, um fortzufahren:</p>
-  <button onclick="showPrompt()">Zum Adminbereich</button>
-  <div id="codePrompt">
-    <input type="password" id="passwordInput" placeholder="Admin-Code eingeben">
-    <button onclick="checkPassword()">Bestätigen</button>
-    <div id="error"></div>
+  <h1>DSA - Spieler auswählen</h1>
+  <div id="spielerContainer">
+    <!-- Hier erscheinen später alle Spieler als "Cards" -->
   </div>
+  <div id="error"></div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import {
+      getAll
+    } from "./scripts/firebase-utils.js";  // Utility-Funktionen
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBHIftX5AvSJaPAiUIek0TBVjEtxwZo7Ow",
-      authDomain: "dsapp-6722f.firebaseapp.com",
-      projectId: "dsapp-6722f"
-    };
+    const COLLECTION = "Spieler";
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    async function ladeSpielerListe() {
+      const container = document.getElementById("spielerContainer");
+      container.innerHTML = "";
 
-    window.showPrompt = function () {
-      document.getElementById("codePrompt").style.display = "flex";
-    };
+      try {
+        const spielerListe = await getAll(COLLECTION);
 
-    window.checkPassword = async function () {
-      const input = document.getElementById("passwordInput").value.trim();
-      const errorDiv = document.getElementById("error");
-      errorDiv.textContent = "";
+        if (spielerListe.length === 0) {
+          container.innerHTML = "<p>Keine Spieler gefunden.</p>";
+          return;
+        }
 
-      if (!input) {
-        errorDiv.textContent = "Bitte gib ein Passwort ein.";
+        spielerListe.forEach(({ id, data }) => {
+          const btn = document.createElement("div");
+          btn.className = "spielerCard";
+          btn.textContent = data.spielername || id;
+          btn.onclick = () => promptPasswort(id, data.spielername);
+          container.appendChild(btn);
+        });
+      } catch (err) {
+        console.error(err);
+        document.getElementById("error").textContent = "Fehler beim Laden der Spieler.";
+      }
+    }
+
+    /**
+     * Zeigt ein Prompt-Fenster, um das Passwort abzufragen.
+     * Bei korrekter Eingabe wird zur Heldenverwaltung weitergeleitet.
+     */
+    async function promptPasswort(spielerId, spielerName) {
+      const pwd = prompt(`Bitte Passwort für "${spielerName}" eingeben:`);
+
+      if (pwd === null) {
+        // Abbrechen gedrückt
         return;
       }
 
+      // Hol das Spieler-Dokument aus Firestore, um das Passwort zu überprüfen
       try {
-        const docRef = doc(db, "Info", "Admin-Passwort");
-        const docSnap = await getDoc(docRef);
+        import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js")
+          .then(async module => {
+            const { doc, getDoc } = module;
+            const { db } = await import("./scripts/firebase-config.js");
 
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          const storedPassword = data["Admin-Passwort"]?.toString();
+            const docRef = doc(db, COLLECTION, spielerId);
+            const docSnap = await getDoc(docRef);
 
-          if (input === storedPassword) {
-            window.location.href = "admin/eigenschaften.html";
-          } else {
-            errorDiv.textContent = "Falsches Passwort.";
-          }
-        } else {
-          errorDiv.textContent = "Admin-Passwort nicht gefunden.";
-        }
+            if (!docSnap.exists()) {
+              alert("Spieler nicht gefunden.");
+              return;
+            }
+
+            const data = docSnap.data();
+            const storedPw = data.passwort || "";
+
+            // In der echten Welt musst du hier einen Hash-Vergleich machen!
+            if (pwd === storedPw) {
+              // Weiterleitung zur Heldenverwaltung. Hier als Beispiel "heldenverwaltung.html"
+              // und wir übergeben den Spieler-ID als Query-Parameter.
+              window.location.href = `heldenverwaltung.html?player=${encodeURIComponent(spielerId)}`;
+            } else {
+              alert("Falsches Passwort.");
+            }
+          });
       } catch (err) {
         console.error(err);
-        errorDiv.textContent = "Fehler beim Abrufen des Passworts.";
+        alert("Fehler bei der Passwortprüfung.");
       }
-    };
+    }
+
+    // Bei Seitenaufruf: Spieler laden
+    window.addEventListener("load", ladeSpielerListe);
   </script>
 </body>
 </html>
